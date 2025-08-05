@@ -1,3 +1,4 @@
+// === Updated investment.js with Backend Integration and Price Updates ===
 
 const stocks = [
     { ticker: "AAPL", name: "Apple", price: 182.9, logo: "https://logo.clearbit.com/apple.com" },
@@ -22,6 +23,7 @@ const stocks = [
     { ticker: "SBI", name: "State Bank of India", price: 650, logo: "https://logo.clearbit.com/onlinesbi.sbi" },
   ];
   
+  const userId = 1;
   const companyHistoryData = {};
   stocks.forEach((stock, idx) => {
     const prices = [], dates = [];
@@ -44,8 +46,6 @@ const stocks = [
   const modalPrice = document.getElementById("modalCompanyPrice");
   const shareCount = document.getElementById("shareCount");
   const buyBtn = document.getElementById("buyBtn");
-  
-  
   let selectedCompany = null;
   
   function renderCompanies() {
@@ -82,8 +82,8 @@ const stocks = [
       }
   
       const priceElement = document.querySelector(`#price-${index}`);
-const arrowElement = document.querySelector(`#arrow-${index}`);
-
+      const arrowElement = document.querySelector(`#arrow-${index}`);
+  
       if (priceElement && arrowElement) {
         priceElement.innerText = `₹${newPrice}`;
         if (newPrice > oldPrice) {
@@ -108,68 +108,97 @@ const arrowElement = document.querySelector(`#arrow-${index}`);
     document.getElementById("investmentCompanyName").textContent = selectedCompany.name;
     modalPrice.textContent = Number(selectedCompany.price).toFixed(2);
     shareCount.value = "";
-  
-    const history = companyHistoryData[selectedCompany.ticker];
-    renderHistoryChart(history || { dates: [], prices: [] });
+    renderHistoryChart(companyHistoryData[selectedCompany.ticker]);
   }
   
   closeModalBtn.onclick = () => modal.style.display = "none";
   
   buyBtn.onclick = async () => {
     const quantity = parseInt(shareCount.value);
-    const price = parseFloat(selectedCompany.price);
+    const average_price = parseFloat(selectedCompany.price); // Use correct backend field
   
     if (!selectedCompany || quantity <= 0) {
       return alert("Please enter a valid quantity.");
     }
   
-    let balance = localStorage.getItem("balance");
-    balance = balance ? parseFloat(balance) : 25000;
+    try {
+      // 1. Fetch current wallet balance
+      const walletRes = await fetch(`/users/${userId}`);
+      const walletData = await walletRes.json();
+      let balance = parseFloat(walletData.balance);
   
-    const cost = quantity * price;
+      const cost = quantity * average_price;
   
-    if (balance < cost) {
-      alert("Insufficient wallet balance.");
-      return;
+      // 2. Validate balance
+      if (balance < cost) {
+        return alert("Insufficient wallet balance.");
+      }
+  
+      const newBalance = balance - cost;
+  
+      // 3. Update user wallet in backend
+      await fetch(`/users/${userId}/balance`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newBalance })
+      });
+  
+      // 4. Update/add to portfolio
+      await fetch(`/portfolio`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticker: selectedCompany.ticker,
+          quantity,
+          average_price
+        })
+      });
+  
+      // 5. Record the transaction
+      await fetch(`/transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "buy",
+          ticker: selectedCompany.ticker,
+          quantity,
+          price: average_price
+        })
+      });
+  
+      // 6. Redirect after all successful updates
+      alert(`Bought ${quantity} shares of ${selectedCompany.name}`);
+      modal.style.display = "none";
+      window.location.href = "dashboard.html";
+    } catch (err) {
+      console.error("Buy failed:", err);
+      alert("Error processing purchase. Please try again.");
     }
-  
-    const newBalance = balance - cost;
-    localStorage.setItem("balance", newBalance.toFixed(2));
-  
-    alert(`Bought \${quantity} shares of \${selectedCompany.name}`);
-    modal.style.display = "none";
-    window.location.href = "dashboard.html";
   };
   
   
   
   function renderHistoryChart(data) {
-    const ctx = document.getElementById('historyChart').getContext('2d');
-    if (window.historyChartInstance) {
-      window.historyChartInstance.destroy();
-    }
+    const ctx = document.getElementById("historyChart").getContext("2d");
+    if (window.historyChartInstance) window.historyChartInstance.destroy();
   
     window.historyChartInstance = new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
         labels: data.dates,
         datasets: [{
-          label: 'Stock Price',
+          label: "Stock Price",
           data: data.prices,
-          borderColor: '#1976d2',
-          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+          borderColor: "#1976d2",
+          backgroundColor: "rgba(25, 118, 210, 0.1)",
           fill: true,
           tension: 0.3,
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: true }
-        },
-        scales: {
-          y: { beginAtZero: false }
-        }
+        plugins: { legend: { display: true } },
+        scales: { y: { beginAtZero: false } }
       }
     });
   }

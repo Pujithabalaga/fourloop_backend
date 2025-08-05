@@ -12,7 +12,7 @@
     <h1>Stock Portfolio Dashboard</h1>
     <nav>
       <ul>
-        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
         <li><a href="investment.html">Investments</a></li>
         <li><a href="transactions.html">Transactions</a></li>
       </ul>
@@ -21,46 +21,72 @@
 
   <section class="welcome-section">
     <h2>Welcome back!</h2>
-    <p>Here's a quick summary of your portfolio's performance.</p>
+    <p>Here's a summary of your holdings and investment performance.</p>
   </section>
   
   <main class="dashboard-container">
-    <!-- Wallet Balance -->
-    <section class="wallet-section">
-        <h2>Wallet Balance</h2>
-      <div id="walletBalance">Loading...</div>
+
+    <!-- Wallet & Investment Summary -->
+    <section class="summary-section">
+      <div class="summary-card">
+        <h3>Wallet Balance</h3>
+        <div id="walletBalance" class="summary-value">₹0.00</div>
+      </div>
+      <div class="summary-card">
+        <h3>Total Investment</h3>
+        <div id="totalInvestment" class="summary-value">₹0.00</div>
+      </div>
     </section>
 
-    <!-- Profit / Loss Chart -->
-    <section class="charts-section charts-container">
-        <div class="chart-box">
-          <h3>Profit / Loss</h3>
-          <canvas id="profitLossChart"></canvas>
-        </div>
-        <div class="chart-box">
-          <h3>Portfolio Distribution</h3>
-          <canvas id="portfolioPieChart"></canvas>
-        </div>
-      </section>
-      
-      
+    <!-- Charts Section -->
+    <section class="charts-section">
+      <div class="chart-box">
+        <h3>Profit / Loss Over Time</h3>
+        <canvas id="profitLossChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Portfolio Distribution</h3>
+        <canvas id="portfolioPieChart"></canvas>
+      </div>
+    </section>
 
-    <!-- Portfolio Summary -->
+    <!-- Holdings Table -->
     <section class="portfolio-section">
-      <h2>Your Stock Portfolio</h2>
-      <div id="portfolioSummary">Loading portfolio summary...</div>
-      <a href="investment.html" class="view-all-link">View All Investments</a>
+      <h2>Your Holdings</h2>
+      <div class="portfolio-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Shares</th>
+              <th>Price (₹)</th>
+              <th>Total Value (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioBody">
+            <!-- JS will populate rows here -->
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- Recent Transactions -->
-    <section class="transactions-section">
-      <h2>Recent Transactions</h2>
-      <div id="transactionSummary">Loading recent transactions...</div>
-      <a href="transactions.html" class="view-all-link">View All Transactions</a>
+    <!-- Quick Navigation -->
+    <section class="shortcuts-section">
+      <h2>Quick Actions</h2>
+      <div class="action-buttons">
+        <a href="investment.html" class="btn">Buy Stocks</a>
+        <a href="transactions.html" class="btn">View Transactions</a>
+      </div>
     </section>
+
   </main>
 
-  <script src="/js/dashboard.js"></script>
+  <!-- Optional: User ID Configuration -->
+  <script>
+    const userId = 1; // Global user ID variable
+  </script>
 
+  <!-- JS that handles chart rendering, portfolio, etc. -->
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>
