@@ -1,3 +1,4 @@
+
 const stocks = [
     { ticker: "AAPL", name: "Apple", price: 182.9, logo: "https://logo.clearbit.com/apple.com" },
     { ticker: "GOOGL", name: "Google", price: 2715.5, logo: "https://logo.clearbit.com/google.com" },
@@ -43,7 +44,7 @@ const stocks = [
   const modalPrice = document.getElementById("modalCompanyPrice");
   const shareCount = document.getElementById("shareCount");
   const buyBtn = document.getElementById("buyBtn");
-  const sellBtn = document.getElementById("sellBtn");
+  
   
   let selectedCompany = null;
   
@@ -81,7 +82,8 @@ const stocks = [
       }
   
       const priceElement = document.querySelector(`#price-${index}`);
-      const arrowElement = document.querySelector(`#arrow-${index}`);
+const arrowElement = document.querySelector(`#arrow-${index}`);
+
       if (priceElement && arrowElement) {
         priceElement.innerText = `₹${newPrice}`;
         if (newPrice > oldPrice) {
@@ -121,47 +123,25 @@ const stocks = [
       return alert("Please enter a valid quantity.");
     }
   
-    try {
-      // Save to transactions table
-      await fetch("http://localhost:3000/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticker: selectedCompany.ticker,
-          type: "buy",
-          quantity,
-          price
-        })
-      });
+    let balance = localStorage.getItem("balance");
+    balance = balance ? parseFloat(balance) : 25000;
   
-      // Save to portfolio table
-      await fetch("http://localhost:3000/portfolio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticker: selectedCompany.ticker,
-          quantity,
-          average_price: price
-        })
-      });
+    const cost = quantity * price;
   
-      alert(`Bought ${quantity} shares of ${selectedCompany.name}`);
-      modal.style.display = "none";
-      window.location.href = "dashboard.html";
-    } catch (err) {
-      console.error("Buy error:", err);
-      alert("Error saving to backend. Check server.");
+    if (balance < cost) {
+      alert("Insufficient wallet balance.");
+      return;
     }
+  
+    const newBalance = balance - cost;
+    localStorage.setItem("balance", newBalance.toFixed(2));
+  
+    alert(`Bought \${quantity} shares of \${selectedCompany.name}`);
+    modal.style.display = "none";
+    window.location.href = "dashboard.html";
   };
   
-  sellBtn.onclick = () => {
-    const quantity = parseInt(shareCount.value);
-    if (quantity > 0) {
-      alert(`Sold ${quantity} shares of ${selectedCompany.name}`);
-      modal.style.display = "none";
-      // You can add backend sell logic here
-    }
-  };
+  
   
   function renderHistoryChart(data) {
     const ctx = document.getElementById('historyChart').getContext('2d');
@@ -188,9 +168,7 @@ const stocks = [
           legend: { display: true }
         },
         scales: {
-          y: {
-            beginAtZero: false
-          }
+          y: { beginAtZero: false }
         }
       }
     });

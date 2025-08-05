@@ -19,6 +19,8 @@ app.get('/ping', (req, res) => {
 app.use('/transactions', transactionsRouter);
 const portfolioRouter = require('./routes/portfolio');
 app.use('/portfolio', portfolioRouter);
+const usersRouter = require('./routes/users');
+app.use('/users', usersRouter);
 
 // Start the server
 app.listen(port, () => {
