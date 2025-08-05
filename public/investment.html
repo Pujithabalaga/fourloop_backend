@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investments</title>
+  <link rel="stylesheet" href="investment.css" />
+</head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<body>
+    <header>
+        <h1>Stock Portfolio Dashboard</h1>
+        <nav>
+          <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="investment.html">Investments</a></li>
+            <li><a href="transactions.html">Transactions</a></li>
+          </ul>
+        </nav>
+      </header>
+      
+      
+      <section class="welcome-section">
+        <h2>Investment Dashboard</h2>
+        <p>Buy or sell shares in real-time.</p>
+      </section>
+      
+  <div id="companyGrid" class="container"></div>
+
+  <!-- Buy/Sell Modal -->
+  <div class="popup" id="buySellModal">
+    <div class="popup-content">
+      <button class="close-btn" id="closeModal">X</button>
+      <div id="investmentModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2 id="investmentCompanyName">Tesla</h2>
+          <canvas id="historyChart"></canvas> <!-- Chart goes here -->
+        </div>
+      </div>
+      
+      <h2 id="modalCompanyName">Company</h2>
+      <p>Price: ₹<span id="modalCompanyPrice"></span></p>
+      <input type="number" id="shareCount" placeholder="Enter quantity" min="1" />
+      <div class="modal-actions">
+        <button class="buy-btn" id="buyBtn">Buy</button>
+        <button class="sell-btn" id="sellBtn">Sell</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/investment.js"></script>
+</body>
+</html>

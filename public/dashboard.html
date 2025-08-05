@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Portfolio Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Stock Portfolio Dashboard</h1>
+    <nav>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="investment.html">Investments</a></li>
+        <li><a href="transactions.html">Transactions</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="welcome-section">
+    <h2>Welcome back!</h2>
+    <p>Here's a quick summary of your portfolio's performance.</p>
+  </section>
+  
+  <main class="dashboard-container">
+    <!-- Wallet Balance -->
+    <section class="wallet-section">
+        <h2>Wallet Balance</h2>
+      <div id="walletBalance">Loading...</div>
+    </section>
+
+    <!-- Profit / Loss Chart -->
+    <section class="charts-section charts-container">
+        <div class="chart-box">
+          <h3>Profit / Loss</h3>
+          <canvas id="profitLossChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Portfolio Distribution</h3>
+          <canvas id="portfolioPieChart"></canvas>
+        </div>
+      </section>
+      
+      
+
+    <!-- Portfolio Summary -->
+    <section class="portfolio-section">
+      <h2>Your Stock Portfolio</h2>
+      <div id="portfolioSummary">Loading portfolio summary...</div>
+      <a href="investment.html" class="view-all-link">View All Investments</a>
+    </section>
+
+    <!-- Recent Transactions -->
+    <section class="transactions-section">
+      <h2>Recent Transactions</h2>
+      <div id="transactionSummary">Loading recent transactions...</div>
+      <a href="transactions.html" class="view-all-link">View All Transactions</a>
+    </section>
+  </main>
+
+  <script src="/js/dashboard.js"></script>
+
+</body>
+</html>

@@ -6,6 +6,9 @@ const transactionsRouter = require('./routes/transactions');
 
 // Middleware to parse JSON
 app.use(express.json());
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Health check route
 app.get('/ping', (req, res) => {
