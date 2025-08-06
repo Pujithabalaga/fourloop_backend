@@ -54,6 +54,8 @@ app.use('/transactions', (req, res, next) => {
 }, transactionsRouter);
 
 app.use('/portfolio', portfolioRouter);
+const usersRouter = require('./routes/users');
+app.use('/users', usersRouter);
 
 // Start the server
 app.listen(port, () => {

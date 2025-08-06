@@ -1,137 +1,122 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // ===== Wallet Balance Setup =====
-    let userBalance = localStorage.getItem('balance');
-    if (userBalance === null) {
-      userBalance = 25000;
-      localStorage.setItem('balance', userBalance);
-    } else {
-      userBalance = parseFloat(userBalance);
-    }
-    document.getElementById('walletBalance').textContent = `₹${userBalance.toFixed(2)}`;
+    const userId = 1;
   
-    // ===== Fetch Portfolio and Render =====
+    // ===== Fetch Wallet Balance =====
     try {
-      const portfolioRes = await fetch('/portfolio');
-      const portfolio = await portfolioRes.json();
+      const res = await fetch(`/users/${userId}`);
+      const data = await res.json();
+      const userBalance = parseFloat(data.balance || 0);
+      document.getElementById('walletBalance').textContent = `₹${userBalance.toFixed(2)}`;
+    } catch (err) {
+      console.error('Error fetching wallet balance:', err);
+    }
   
+    // ===== Fetch Portfolio =====
+    let portfolio = [];
+    try {
+      const res = await fetch('/portfolio');
+      portfolio = await res.json();
       renderPortfolio(portfolio);
       drawPortfolioPieChart(portfolio);
+      calculateTotalInvestment(portfolio);
     } catch (err) {
       console.error('Error fetching portfolio:', err);
-      document.getElementById('portfolioSummary').textContent = 'Failed to load portfolio.';
     }
   
-    // ===== Fetch Transactions and Render =====
+    // ===== Fetch Transactions =====
     try {
-      const transactionsRes = await fetch('/transactions');
-      const transactions = await transactionsRes.json();
-  
-      renderTransactions(transactions);
+      const res = await fetch('/transactions');
+      const transactions = await res.json();
       drawProfitLossChart(transactions);
     } catch (err) {
       console.error('Error fetching transactions:', err);
-      document.getElementById('transactionSummary').textContent = 'Failed to load transactions.';
     }
   
-    // ===== Render Portfolio Items =====
+    // ===== Render Portfolio Table =====
     function renderPortfolio(portfolio) {
-      const container = document.getElementById('portfolioSummary');
-      container.innerHTML = '';
-      if (portfolio.length === 0) {
-        container.textContent = 'No portfolio data available.';
-        return;
-      }
+      const body = document.getElementById('portfolioBody');
+      body.innerHTML = '';
   
       portfolio.forEach(stock => {
-        const div = document.createElement('div');
-        div.classList.add('portfolio-item');
-        div.textContent = `${stock.ticker} - ${stock.quantity} shares`;
-        container.appendChild(div);
+        const row = document.createElement('tr');
+        const avgPrice = parseFloat(stock.average_price || 0);
+        const totalValue = stock.quantity * avgPrice;
+  
+        row.innerHTML = `
+          <td>${stock.ticker}</td>
+          <td>${stock.quantity}</td>
+          <td>₹${avgPrice.toFixed(2)}</td>
+          <td>₹${totalValue.toFixed(2)}</td>
+        `;
+        body.appendChild(row);
       });
     }
   
-    // ===== Render Recent Transactions =====
-    function renderTransactions(transactions) {
-      const container = document.getElementById('transactionSummary');
-      container.innerHTML = '';
-      if (transactions.length === 0) {
-        container.textContent = 'No transactions found.';
-        return;
-      }
-  
-      const recent = transactions.slice(-5).reverse();
-      recent.forEach(tx => {
-        const div = document.createElement('div');
-        div.classList.add('transaction-item');
-  
-        const total = tx.total !== undefined
-          ? tx.total
-          : (tx.price * tx.quantity);
-  
-        div.textContent = `${tx.type.toUpperCase()} | ${tx.ticker} | ₹${tx.price} x ${tx.quantity} = ₹${total.toFixed(2)}`;
-        container.appendChild(div);
-      });
+    // ===== Calculate Total Investment =====
+    function calculateTotalInvestment(portfolio) {
+      const total = portfolio.reduce((sum, stock) => {
+        const avgPrice = parseFloat(stock.average_price || 0);
+        return sum + stock.quantity * avgPrice;
+      }, 0);
+      document.getElementById('totalInvestment').textContent = `₹${total.toFixed(2)}`;
     }
   
     // ===== Portfolio Pie Chart =====
     function drawPortfolioPieChart(portfolio) {
       const ctx = document.getElementById('portfolioPieChart').getContext('2d');
       const labels = portfolio.map(s => s.ticker);
-      const quantities = portfolio.map(s => s.quantity);
-      const backgroundColors = ['#42a5f5', '#66bb6a', '#ef5350', '#ffa726', '#ab47bc', '#8d6e63', '#26c6da', '#d4e157'];
+      const data = portfolio.map(s => s.quantity);
   
       new Chart(ctx, {
         type: 'pie',
         data: {
           labels,
           datasets: [{
-            label: 'Portfolio Distribution',
-            data: quantities,
-            backgroundColor: backgroundColors.slice(0, quantities.length)
+            label: 'Holdings',
+            data,
+            backgroundColor: [
+              '#42a5f5', '#ef5350', '#66bb6a', '#ffa726', '#ab47bc',
+              '#26c6da', '#d4e157', '#ff7043', '#8d6e63', '#78909c'
+            ]
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'right'
-            },
             title: {
               display: true,
-              text: 'Stock Portfolio Distribution'
+              text: 'Portfolio Distribution'
             }
           }
         }
       });
     }
   
-    // ===== Profit/Loss Line Chart =====
+    // ===== Profit/Loss Chart =====
     function drawProfitLossChart(transactions) {
       const ctx = document.getElementById('profitLossChart').getContext('2d');
-  
       const grouped = {};
+  
       transactions.forEach(tx => {
-        const date = new Date(tx.created_at || Date.now()).toLocaleDateString();
+        const date = new Date(tx.transaction_date || Date.now()).toLocaleDateString();
         const total = tx.total || (tx.price * tx.quantity);
         if (!grouped[date]) grouped[date] = 0;
-        grouped[date] += (tx.type === 'buy' ? -total : total);
+        grouped[date] += tx.type.toLowerCase() === 'buy' ? -total : total;
       });
   
       const labels = Object.keys(grouped);
       const values = Object.values(grouped);
   
-      // Calculate running total (cumulative profit/loss)
-      const runningTotals = [];
+      const cumulative = [];
       let sum = 0;
-      values.forEach(val => {
-        sum += val;
-        runningTotals.push(sum);
+      values.forEach(v => {
+        sum += v;
+        cumulative.push(sum);
       });
   
-      // Ensure at least 2 points for the chart
       if (labels.length < 2) {
         labels.unshift('Start');
-        runningTotals.unshift(0);
+        cumulative.unshift(0);
       }
   
       new Chart(ctx, {
@@ -139,8 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         data: {
           labels,
           datasets: [{
-            label: 'Net Profit/Loss Over Time',
-            data: runningTotals,
+            label: 'Net P/L',
+            data: cumulative,
             borderColor: '#1e88e5',
             backgroundColor: 'rgba(30,136,229,0.2)',
             tension: 0.3,
@@ -152,11 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           plugins: {
             title: {
               display: true,
-              text: 'Profit/Loss Timeline'
+              text: 'Profit / Loss Over Time'
             },
             tooltip: {
               callbacks: {
-                label: context => `₹${context.parsed.y.toFixed(2)}`
+                label: ctx => `₹${ctx.parsed.y.toFixed(2)}`
               }
             }
           },
