@@ -1,47 +1,44 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const userId = 1;
   
-    // ===== Fetch Wallet Balance =====
-    try {
-      const res = await fetch(`/users/${userId}`);
-      const data = await res.json();
-      const userBalance = parseFloat(data.balance || 0);
+    await fetchAndRenderDashboard();
+  
+    async function fetchAndRenderDashboard() {
+      try {
+        const [balanceRes, portfolioRes, transactionsRes] = await Promise.all([
+          fetch(`/users/${userId}`),
+          fetch('/portfolio'),
+          fetch('/transactions')
+        ]);
+  
+        const userData = await balanceRes.json();
+        const portfolio = await portfolioRes.json();
+        const transactions = await transactionsRes.json();
+  
+        renderWalletBalance(userData.balance);
+        renderPortfolio(portfolio);
+        calculateTotalInvestment(portfolio);
+        drawPortfolioPieChart(portfolio);
+        drawProfitLossChart(transactions);
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+      }
+    }
+  
+    function renderWalletBalance(balance) {
+      const userBalance = parseFloat(balance || 0);
       document.getElementById('walletBalance').textContent = `₹${userBalance.toFixed(2)}`;
-    } catch (err) {
-      console.error('Error fetching wallet balance:', err);
     }
   
-    // ===== Fetch Portfolio =====
-    let portfolio = [];
-    try {
-      const res = await fetch('/portfolio');
-      portfolio = await res.json();
-      renderPortfolio(portfolio);
-      drawPortfolioPieChart(portfolio);
-      calculateTotalInvestment(portfolio);
-    } catch (err) {
-      console.error('Error fetching portfolio:', err);
-    }
-  
-    // ===== Fetch Transactions =====
-    try {
-      const res = await fetch('/transactions');
-      const transactions = await res.json();
-      drawProfitLossChart(transactions);
-    } catch (err) {
-      console.error('Error fetching transactions:', err);
-    }
-  
-    // ===== Render Portfolio Table =====
     function renderPortfolio(portfolio) {
       const body = document.getElementById('portfolioBody');
       body.innerHTML = '';
   
       portfolio.forEach(stock => {
-        const row = document.createElement('tr');
         const avgPrice = parseFloat(stock.average_price || 0);
         const totalValue = stock.quantity * avgPrice;
   
+        const row = document.createElement('tr');
         row.innerHTML = `
           <td>${stock.ticker}</td>
           <td>${stock.quantity}</td>
@@ -52,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   
-    // ===== Calculate Total Investment =====
     function calculateTotalInvestment(portfolio) {
       const total = portfolio.reduce((sum, stock) => {
         const avgPrice = parseFloat(stock.average_price || 0);
@@ -61,13 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('totalInvestment').textContent = `₹${total.toFixed(2)}`;
     }
   
-    // ===== Portfolio Pie Chart =====
     function drawPortfolioPieChart(portfolio) {
       const ctx = document.getElementById('portfolioPieChart').getContext('2d');
       const labels = portfolio.map(s => s.ticker);
       const data = portfolio.map(s => s.quantity);
   
-      new Chart(ctx, {
+      if (window.pieChartInstance) window.pieChartInstance.destroy(); // Cleanup if exists
+  
+      window.pieChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
           labels,
@@ -92,7 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   
-    // ===== Profit/Loss Chart =====
     function drawProfitLossChart(transactions) {
       const ctx = document.getElementById('profitLossChart').getContext('2d');
       const grouped = {};
@@ -119,7 +115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         cumulative.unshift(0);
       }
   
-      new Chart(ctx, {
+      if (window.lineChartInstance) window.lineChartInstance.destroy(); // Cleanup if exists
+  
+      window.lineChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels,
