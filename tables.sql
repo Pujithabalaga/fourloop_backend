@@ -15,4 +15,13 @@ CREATE TABLE transactions (
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 SELECT * FROM transactions;
-select * from protfolio;
+SELECT * FROM portfolio;
+CREATE TABLE users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  balance DECIMAL(10, 2) DEFAULT 25000
+);
+
+INSERT INTO users (username, balance) VALUES ('Martin', 25000);
+select * from users;
+UPDATE users SET balance = balance + 20000 WHERE id = 1;
