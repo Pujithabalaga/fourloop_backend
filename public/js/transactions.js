@@ -3,9 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   async function loadTransactions() {
-    const res = await fetch(`/transactions?_=${Date.now()}`);  // ⏱ cache busting
+    const res = await fetch(`/transactions?_=${Date.now()}`);
     const transactions = await res.json();
-    console.log("Fetched transactions:", transactions);  // 🐞 debug log
   
     const buyBody = document.querySelector('#buyTable tbody');
     const sellBody = document.querySelector('#sellTable tbody');
@@ -24,12 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${new Date(tx.created_at).toLocaleString()}</td>
       `;
   
-      const type = tx.type.toLowerCase();  // ✅ normalize type for comparison
+      const type = tx.type.toLowerCase();
   
       if (type === 'buy') {
         const sellBtn = document.createElement('button');
         sellBtn.textContent = 'Sell';
-        sellBtn.onclick = () => sellStock(tx);
+        sellBtn.onclick = () => sellStock(tx, row); // Pass row for UI removal
   
         const actionCell = document.createElement('td');
         actionCell.appendChild(sellBtn);
@@ -42,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  async function sellStock(tx) {
+  async function sellStock(tx, row) {
     const confirmSell = confirm(`Are you sure you want to sell ${tx.quantity} of ${tx.ticker}?`);
     if (!confirmSell) return;
   
@@ -53,14 +52,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ticker: tx.ticker,
         type: 'sell',
         quantity: tx.quantity,
-        price: tx.price
+        price: tx.price,
+        buy_id: tx.id   // 🔑 Send original buy transaction ID
       })
     });
   
     if (res.ok) {
       alert('Transaction successful!');
-      console.log('Reloading transactions after sell...');
-      loadTransactions();
+      row.remove(); // remove buy row from UI
+  
+      const sellBody = document.querySelector('#sellTable tbody');
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>New</td>
+        <td>${tx.ticker}</td>
+        <td>${tx.quantity}</td>
+        <td>${tx.price}</td>
+        <td>${new Date().toLocaleString()}</td>
+      `;
+      sellBody.appendChild(newRow);
     } else {
       alert('Sell failed.');
     }
