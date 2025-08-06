@@ -1,5 +1,3 @@
-// === Updated investment.js with Backend Integration and Price Updates ===
-
 const stocks = [
     { ticker: "AAPL", name: "Apple", price: 182.9, logo: "https://logo.clearbit.com/apple.com" },
     { ticker: "GOOGL", name: "Google", price: 2715.5, logo: "https://logo.clearbit.com/google.com" },
@@ -115,68 +113,63 @@ const stocks = [
   
   buyBtn.onclick = async () => {
     const quantity = parseInt(shareCount.value);
-    const average_price = parseFloat(selectedCompany.price); // Use correct backend field
+    const price = parseFloat(selectedCompany.price);
   
     if (!selectedCompany || quantity <= 0) {
       return alert("Please enter a valid quantity.");
     }
   
     try {
-      // 1. Fetch current wallet balance
       const walletRes = await fetch(`/users/${userId}`);
       const walletData = await walletRes.json();
       let balance = parseFloat(walletData.balance);
   
-      const cost = quantity * average_price;
-  
-      // 2. Validate balance
+      const cost = quantity * price;
       if (balance < cost) {
         return alert("Insufficient wallet balance.");
       }
   
       const newBalance = balance - cost;
   
-      // 3. Update user wallet in backend
+      // Step 1: Update wallet balance
       await fetch(`/users/${userId}/balance`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newBalance })
       });
   
-      // 4. Update/add to portfolio
+      // Step 2: Update/add to portfolio
       await fetch(`/portfolio`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticker: selectedCompany.ticker,
           quantity,
-          average_price
+          price
         })
       });
   
-      // 5. Record the transaction
+      // Step 3: Record transaction
       await fetch(`/transactions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "buy",
+          type: "BUY",
           ticker: selectedCompany.ticker,
           quantity,
-          price: average_price
+          price
         })
       });
   
-      // 6. Redirect after all successful updates
-      alert(`Bought ${quantity} shares of ${selectedCompany.name}`);
+      alert(`Successfully bought ${quantity} shares of ${selectedCompany.name}`);
       modal.style.display = "none";
       window.location.href = "dashboard.html";
+  
     } catch (err) {
       console.error("Buy failed:", err);
-      alert("Error processing purchase. Please try again.");
+      alert("Something went wrong. Please try again.");
     }
   };
-  
-  
   
   function renderHistoryChart(data) {
     const ctx = document.getElementById("historyChart").getContext("2d");
