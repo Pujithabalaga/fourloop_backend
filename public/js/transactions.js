@@ -15,12 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
     transactions.forEach(tx => {
       const row = document.createElement('tr');
   
+      const formattedDate = new Date(tx.created_at).toLocaleString('en-IN', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+  
       row.innerHTML = `
         <td>${tx.id}</td>
         <td>${tx.ticker}</td>
         <td>${tx.quantity}</td>
         <td>${tx.price}</td>
-        <td>${new Date(tx.created_at).toLocaleString()}</td>
+        <td>${tx.total.toFixed(2)}</td>
+        <td>${formattedDate}</td>
       `;
   
       const type = tx.type.toLowerCase();
@@ -53,22 +59,29 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'sell',
         quantity: tx.quantity,
         price: tx.price,
-        buy_id: tx.id   // 🔑 Send original buy transaction ID
+        buy_id: tx.id
       })
     });
   
     if (res.ok) {
       alert('Transaction successful!');
-      row.remove(); // remove buy row from UI
+      row.remove();
   
       const sellBody = document.querySelector('#sellTable tbody');
       const newRow = document.createElement('tr');
+  
+      const now = new Date().toLocaleString('en-IN', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+  
       newRow.innerHTML = `
         <td>New</td>
         <td>${tx.ticker}</td>
         <td>${tx.quantity}</td>
         <td>${tx.price}</td>
-        <td>${new Date().toLocaleString()}</td>
+        <td>${(tx.price * tx.quantity).toFixed(2)}</td>
+        <td>${now}</td>
       `;
       sellBody.appendChild(newRow);
     } else {

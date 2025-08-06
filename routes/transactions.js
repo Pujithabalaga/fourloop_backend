@@ -5,8 +5,17 @@ const db = require('../db');
 // ===== Get All Transactions =====
 router.get('/', (req, res) => {
   const sql = `
-    SELECT id, ticker, type, quantity, price, (quantity * price) AS total, transaction_date FROM transactions ORDER BY transaction_date ASC
- `;
+    SELECT 
+      id, 
+      ticker, 
+      type, 
+      quantity, 
+      price, 
+      transaction_date AS created_at,
+      (quantity * price) AS total
+    FROM transactions
+    ORDER BY transaction_date ASC
+  `;
 
   db.query(sql, (err, results) => {
     if (err) {
