@@ -4,7 +4,7 @@ const db = require('../db');
 
 // ===== Get All Portfolio Entries =====
 router.get('/', (req, res) => {
-  const query = 'SELECT ticker, quantity, average_price AS price FROM portfolio';
+  const query = 'SELECT ticker, quantity, average_price FROM portfolio';
   db.query(query, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to fetch portfolio data' });
