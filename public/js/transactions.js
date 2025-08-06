@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${tx.ticker}</td>
         <td>${tx.quantity}</td>
         <td>${tx.price}</td>
-        <td>${new Date(tx.transaction_date).toLocaleString()}</td>
+        <td>${new Date(tx.created_at).toLocaleString()}</td>
       `;
   
       const type = tx.type.toLowerCase();  // ✅ normalize type for comparison
