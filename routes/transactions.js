@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// ===== Get All Transactions (ordered by date) =====
+// ===== Get All Transactions =====
 router.get('/', (req, res) => {
   const sql = `
     SELECT id, ticker, type, quantity, price, transaction_date AS created_at
@@ -20,22 +20,34 @@ router.get('/', (req, res) => {
 
 // ===== Add New Transaction =====
 router.post('/', (req, res) => {
-  const { ticker, type, quantity, price } = req.body;
+  const { ticker, type, quantity, price, buy_id } = req.body;
 
   if (!ticker || !type || !quantity || !price) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const sql = `
+  const insertSql = `
     INSERT INTO transactions (ticker, type, quantity, price)
     VALUES (?, ?, ?, ?)
   `;
 
-  db.query(sql, [ticker, type.toUpperCase(), quantity, price], (err, result) => {
+  db.query(insertSql, [ticker, type.toUpperCase(), quantity, price], (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to add transaction' });
     }
-    res.status(201).json({ message: 'Transaction added', id: result.insertId });
+
+    // If it's a sell, delete the corresponding buy transaction
+    if (type.toLowerCase() === 'sell' && buy_id) {
+      const deleteSql = `DELETE FROM transactions WHERE id = ?`;
+      db.query(deleteSql, [buy_id], (deleteErr) => {
+        if (deleteErr) {
+          return res.status(500).json({ error: 'Sell added, but failed to delete original buy' });
+        }
+        return res.status(201).json({ message: 'Sell recorded and Buy removed' });
+      });
+    } else {
+      res.status(201).json({ message: 'Transaction added', id: result.insertId });
+    }
   });
 });
 
