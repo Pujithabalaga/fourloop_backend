@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investments</title>
+  <title>Investments | FinTrack</title>
   <link rel="stylesheet" href="investment.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -26,15 +26,28 @@
 
   <section class="controls">
     <input type="text" id="searchInput" placeholder="Search companies..." />
-    <section class="filter-buttons">
-        <button id="showGainers">Top Gainers (30 Days)</button>
-        <button id="showLosers">Top Losers (30 Days)</button>
-        <button id="showAll">Show All Companies</button>
-      </section>
-      
+    <div class="filter-buttons">
+      <button id="showGainers">Top Gainers (30 Days)</button>
+      <button id="showLosers">Top Losers (30 Days)</button>
+      <button id="showAll">Show All Companies</button>
+    </div>
   </section>
 
+  <div id="summary" style="display: flex; justify-content: center; gap: 30px; margin-top: 20px; font-size: 1.2rem;">
+    <span style="color: #000;">💸 Total Investment: <span style="color: #eba307">₹<span id="totalInvestment">0</span></span></span>
+    <span style="color: #000;">📊 Current Value: <span style="color: #eba307;">₹<span id="currentValue">0</span></span></span>
+    <span id="profitLossBox">📈 Profit/Loss: ₹<span id="profitLoss">0</span></span>
+  </div>
+  
+  
+  
+
   <div id="companyGrid" class="container"></div>
+
+  <section class="insight-panel">
+    <h3>Suggestions</h3>
+    <ul id="insightList"></ul>
+  </section>
 
   <!-- Buy/Sell Modal -->
   <div class="popup" id="buySellModal">
@@ -42,7 +55,7 @@
       <button class="close-btn" id="closeModal">X</button>
       <div id="investmentModal" class="modal">
         <div class="modal-content">
-          <h2 id="investmentCompanyName">Tesla</h2>
+          <h2 id="investmentCompanyName">Company</h2>
           <canvas id="historyChart"></canvas>
         </div>
       </div>

@@ -45,14 +45,15 @@ router.post('/', (req, res) => {
 
     // If it's a sell, delete the corresponding buy transaction
     if (type.toLowerCase() === 'sell' && buy_id) {
-      const deleteSql = `DELETE FROM transactions WHERE id = ?`;
-      db.query(deleteSql, [buy_id], (deleteErr) => {
-        if (deleteErr) {
-          return res.status(500).json({ error: 'Sell added, but failed to delete original buy' });
-        }
-        return res.status(201).json({ message: 'Sell recorded and Buy removed' });
-      });
-    } else {
+        const updateBuySql = `UPDATE transactions SET quantity = quantity - ? WHERE id = ?`;
+        db.query(updateBuySql, [quantity, buy_id], (err2) => {
+          if (err2) return res.status(500).json({ error: 'Sell added, but failed to update original buy' });
+          return res.status(201).json({ message: 'Sell recorded and Buy updated' });
+        });
+      }
+      
+      
+     else {
       res.status(201).json({ message: 'Transaction added', id: result.insertId });
     }
   });
