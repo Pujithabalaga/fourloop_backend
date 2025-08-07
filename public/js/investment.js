@@ -222,7 +222,80 @@ if (priceChangeObj) {
       console.error("Buy failed:", err);
       alert("Something went wrong.");
     }
+    updateInvestmentSummary();
+
   };
+  async function updateInvestmentSummary() {
+    try {
+      const response = await fetch('/portfolio');
+      const portfolio = await response.json();
+  
+      console.log("🚀 Portfolio from backend:", portfolio);
+  
+      let totalInvestment = 0;
+      let currentValue = 0;
+  
+      portfolio.forEach(item => {
+        const stock = stocks.find(s => s.ticker === item.ticker);
+  
+        if (!stock) {
+          console.warn("❗ Stock not found for ticker:", item.ticker);
+          return;
+        }
+  
+        const quantity = Number(item.quantity);
+        const buyPrice = Number(item.average_price); // ✅ Correct field from backend
+        const currentPrice = Number(stock.price);     // ✅ From live market prices
+  
+        console.log(`✔ Calculating ${item.ticker}: Qty=${quantity}, Buy=${buyPrice}, Now=${currentPrice}`);
+  
+        if (!isNaN(quantity) && !isNaN(buyPrice) && !isNaN(currentPrice)) {
+          totalInvestment += quantity * buyPrice;
+          currentValue += quantity * currentPrice;
+        } else {
+          console.error("⚠️ Invalid data:", { quantity, buyPrice, currentPrice });
+        }
+      });
+  
+      const profitLoss = currentValue - totalInvestment;
+  
+      console.log("📈 Total Investment:", totalInvestment);
+      console.log("💰 Current Value:", currentValue);
+      console.log("🟢 Profit/Loss:", profitLoss);
+  
+      document.getElementById("totalInvestment").textContent = totalInvestment.toFixed(2);
+      document.getElementById("currentValue").textContent = currentValue.toFixed(2);
+  
+      const profitLossEl = document.getElementById("profitLoss");
+      profitLossEl.textContent = `${profitLoss.toFixed(2)}`;
+      profitLossEl.className = profitLoss > 0 ? "green" : profitLoss < 0 ? "red" : "neutral";
+  
+    } catch (err) {
+      console.error("❌ Failed to update investment summary:", err);
+    }
+    const profitLossEl = document.getElementById("profitLoss");
+const profitLossBox = document.getElementById("profitLossBox");
+
+profitLossEl.textContent = profitLoss.toFixed(2);
+
+// Remove old classes if any
+profitLossBox.classList.remove("green", "red", "neutral");
+
+// Apply appropriate color
+if (profitLoss > 0) {
+  profitLossBox.classList.add("green");
+} else if (profitLoss < 0) {
+  profitLossBox.classList.add("red");
+} else {
+  profitLossBox.classList.add("neutral");
+}
+
+
+  }
+  
+  
+  
+  
   
   function renderHistoryChart(data) {
     const ctx = document.getElementById("historyChart").getContext("2d");
@@ -253,7 +326,9 @@ if (priceChangeObj) {
   setInterval(() => {
     updatePrices();
     renderCompanies(currentView);
+    updateInvestmentSummary();
   }, 3000);
+  
   // 👉 Show all companies initially when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     renderCompanies(); // This will populate all company cards on load
