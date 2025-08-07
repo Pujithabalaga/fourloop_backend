@@ -6,6 +6,8 @@
   <title>FinTrack Portfolio</title>
   <link rel="stylesheet" href="dashboard.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
@@ -23,9 +25,8 @@
     <h2>Welcome back!</h2>
     <p>Here's a summary of your holdings and investment performance.</p>
   </section>
-  
-  <main class="dashboard-container">
 
+  <main class="dashboard-container">
     <!-- Wallet & Investment Summary -->
     <section class="summary-section">
       <div class="summary-card">
@@ -40,15 +41,20 @@
 
     <!-- Charts Section -->
     <section class="charts-section">
-      <div class="chart-box">
-        <h3>Profit / Loss Over Time</h3>
-        <canvas id="profitLossChart"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Portfolio Distribution</h3>
-        <canvas id="portfolioPieChart"></canvas>
-      </div>
-    </section>
+        <div class="chart-box">
+          <h3>Profit / Loss Over Time</h3>
+          <canvas id="profitLossChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Portfolio Donut Chart</h3>
+          <canvas id="portfolioPieChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Total Value by Stock</h3>
+          <canvas id="valueChart"></canvas>
+        </div>
+      </section>
+      
 
     <!-- Holdings Table -->
     <section class="portfolio-section">
@@ -78,7 +84,6 @@
         <a href="transactions.html" class="btn">View Transactions</a>
       </div>
     </section>
-
   </main>
 
   <!-- Optional Loader -->
@@ -91,5 +96,8 @@
 
   <!-- Link to JS for fetching and rendering dashboard -->
   <script src="/js/dashboard.js"></script>
+  <!-- Custom Tooltip -->
+
+
 </body>
 </html>
