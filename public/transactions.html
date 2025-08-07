@@ -4,6 +4,30 @@
   <meta charset="UTF-8" />
   <title>Transactions</title>
   <link rel="stylesheet" href="transactions.css">
+  <style>
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .neutral { color: gray; font-weight: bold; }
+
+    input[type="number"] {
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 6px 10px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -12,48 +36,54 @@
       <ul>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="investment.html">Investments</a></li>
-        <li><a href="transactions.html">Transactions</a></li>
+        <li><a href="transactions.html" class="active">Transactions</a></li>
       </ul>
     </nav>
   </header>
 
-  <h1 class="transactions-heading">📈 Transactions</h1>
+  <main>
+    <h1 class="transactions-heading">📈 Transactions</h1>
 
-  <div>
-    <h2>🟢 Bought Stocks</h2>
-    <table id="buyTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Ticker</th>
-          <th>Quantity</th>
-          <th>Price</th>
-          <th>Total</th>
-          <th>Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+    <section>
+      <h2>🟢Our Holdings</h2>
+      <table id="buyTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ticker</th>
+            <th>Quantity</th>
+            <th>Buy Price</th>
+            <th>Current Price</th>
+            <th>Value Now</th>
+            <th>Profit / Loss</th>
+            <th>Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-  <div>
-    <h2>🔴 Sold Stocks</h2>
-    <table id="sellTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Ticker</th>
-          <th>Quantity</th>
-          <th>Price</th>
-          <th>Total</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+    <section>
+      <h2>🔴 Sold Stocks</h2>
+      <table id="sellTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ticker</th>
+            <th>Quantity</th>
+            <th>Sell Price</th>
+            <th>Current Price</th>
+            <th>Value Now</th>
+            <th>Profit / Loss</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
 
-  <script src="/js/transactions.js?v=2"></script>
+  <script src="/js/transactions.js?v=10"></script>
 </body>
 </html>

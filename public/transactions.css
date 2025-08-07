@@ -48,7 +48,8 @@
     text-align: center;
     font-size: 1.8rem;
     color: #1976d2;
-    margin-bottom: 30px;
+    margin-top:20px;
+    margin-bottom: 20px;
   }
   
   /* Section headings */
@@ -101,4 +102,6 @@
   td:last-child button:hover {
     background-color: #c0392b;
   }
-  
+  .green { color: green; font-weight: bold; }
+.red { color: red; font-weight: bold; }
+.neutral { color: gray; }

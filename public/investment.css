@@ -205,4 +205,25 @@ body {
       transform: scale(1);
     }
   }
+  .investment-summary {
+    text-align: center;
+    margin: 20px auto;
+    background-color: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 600px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+  .investment-summary h3 {
+    margin: 10px 0;
+  }
+  .neutral {
+    color: #555;
+  }
+  .green {
+    color: rgb(115, 235, 59);
+  }
+  .red {
+    color: red;
+  }
   
