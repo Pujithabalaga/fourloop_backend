@@ -51,6 +51,10 @@ Before running this project, ensure you have the following installed:
 
 ---
 
+![Dashboard](images/dashboard1.jpeg)
+![Dashboard](images/dashboard2.jpeg)
+
+
 ## 📂 Key Components
 
 | Component     | Description                                           |
