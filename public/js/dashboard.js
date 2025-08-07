@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const userId = 1;
-  
     await fetchAndRenderDashboard();
   
     async function fetchAndRenderDashboard() {
@@ -18,7 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderWalletBalance(userData.balance);
         renderPortfolio(portfolio);
         calculateTotalInvestment(portfolio);
-        drawPortfolioPieChart(portfolio);
+        drawDonutChart(portfolio);
+        drawValueBarChart(portfolio);
         drawProfitLossChart(transactions);
       } catch (err) {
         console.error("Error loading dashboard:", err);
@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderPortfolio(portfolio) {
       const body = document.getElementById('portfolioBody');
       body.innerHTML = '';
-  
       portfolio.forEach(stock => {
         const avgPrice = parseFloat(stock.average_price || 0);
         const totalValue = stock.quantity * avgPrice;
@@ -57,19 +56,96 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('totalInvestment').textContent = `₹${total.toFixed(2)}`;
     }
   
-    function drawPortfolioPieChart(portfolio) {
-      const ctx = document.getElementById('portfolioPieChart').getContext('2d');
-      const labels = portfolio.map(s => s.ticker);
-      const data = portfolio.map(s => s.quantity);
+    function drawProfitLossChart(portfolio) {
+        const ctx = document.getElementById('profitLossChart')?.getContext('2d');
+        if (!ctx || !portfolio.length) return;
+      
+        const days = 30;
+        const labels = [];
+        const values = [];
+      
+        let lastTotal = 0;
+      
+        for (let i = days; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const label = date.toISOString().slice(0, 10);
+          labels.push(label);
+      
+          let totalValue = 0;
+      
+          portfolio.forEach(stock => {
+            const basePrice = parseFloat(stock.average_price || 100);
+            const quantity = parseFloat(stock.quantity || 0);
+      
+            // Simulate fluctuation: +/- 5%
+            const fluctuation = (Math.random() * 0.1 - 0.05);
+            const simulatedPrice = basePrice * (1 + fluctuation);
+      
+            totalValue += simulatedPrice * quantity;
+          });
+      
+          // Net change since previous day
+          const profitLoss = i === days ? 0 : totalValue - lastTotal;
+          values.push(profitLoss.toFixed(2));
+          lastTotal = totalValue;
+        }
+      
+        if (window.lineChartInstance) window.lineChartInstance.destroy();
+      
+        window.lineChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Net Daily P/L (₹)',
+              data: values,
+              borderColor: '#2e7d32',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              tension: 0.3,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Simulated Net Daily Profit / Loss'
+              },
+              tooltip: {
+                callbacks: {
+                  label: ctx => `₹${ctx.parsed.y}`
+                }
+              }
+            },
+            scales: {
+              y: {
+                title: { display: true, text: 'Profit / Loss (₹)' }
+              },
+              x: {
+                title: { display: true, text: 'Date' }
+              }
+            }
+          }
+        });
+      }
+      
+    function drawDonutChart(portfolio) {
+      const ctx = document.getElementById('portfolioPieChart')?.getContext('2d');
+      if (!ctx) return;
   
-      if (window.pieChartInstance) window.pieChartInstance.destroy(); // Cleanup if exists
+      const labels = portfolio.map(p => p.ticker);
+      const data = portfolio.map(p => p.quantity * p.average_price);
   
-      window.pieChartInstance = new Chart(ctx, {
-        type: 'pie',
+      if (window.donutChartInstance) window.donutChartInstance.destroy();
+  
+      window.donutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
         data: {
           labels,
           datasets: [{
-            label: 'Holdings',
+            label: 'Investment Value',
             data,
             backgroundColor: [
               '#42a5f5', '#ef5350', '#66bb6a', '#ffa726', '#ab47bc',
@@ -82,61 +158,36 @@ document.addEventListener('DOMContentLoaded', async () => {
           plugins: {
             title: {
               display: true,
-              text: 'Portfolio Distribution'
+              text: 'Portfolio Distribution by Value'
             }
           }
         }
       });
     }
   
-    function drawProfitLossChart(transactions) {
-      const ctx = document.getElementById('profitLossChart').getContext('2d');
-      const grouped = {};
+    function drawValueBarChart(portfolio) {
+      const ctx = document.getElementById('valueChart')?.getContext('2d');
+      if (!ctx) return;
   
-      transactions.forEach(tx => {
-        const date = new Date(tx.transaction_date || Date.now()).toLocaleDateString();
-        const total = tx.total || (tx.price * tx.quantity);
-        if (!grouped[date]) grouped[date] = 0;
-        grouped[date] += tx.type.toLowerCase() === 'buy' ? -total : total;
-      });
+      const labels = portfolio.map(p => p.ticker);
+      const values = portfolio.map(p => p.quantity * p.average_price);
   
-      const labels = Object.keys(grouped);
-      const values = Object.values(grouped);
+      if (window.valueChartInstance) window.valueChartInstance.destroy();
   
-      const cumulative = [];
-      let sum = 0;
-      values.forEach(v => {
-        sum += v;
-        cumulative.push(sum);
-      });
-  
-      if (labels.length < 2) {
-        labels.unshift('Start');
-        cumulative.unshift(0);
-      }
-  
-      if (window.lineChartInstance) window.lineChartInstance.destroy(); // Cleanup if exists
-  
-      window.lineChartInstance = new Chart(ctx, {
-        type: 'line',
+      window.valueChartInstance = new Chart(ctx, {
+        type: 'bar',
         data: {
           labels,
           datasets: [{
-            label: 'Net P/L',
-            data: cumulative,
-            borderColor: '#1e88e5',
-            backgroundColor: 'rgba(30,136,229,0.2)',
-            tension: 0.3,
-            fill: true
+            label: 'Total Value (₹)',
+            data: values,
+            backgroundColor: '#64b5f6'
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            title: {
-              display: true,
-              text: 'Profit / Loss Over Time'
-            },
+            title: { display: true, text: 'Total Value Per Stock' },
             tooltip: {
               callbacks: {
                 label: ctx => `₹${ctx.parsed.y.toFixed(2)}`
@@ -145,16 +196,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           },
           scales: {
             y: {
-              title: {
-                display: true,
-                text: 'Amount (₹)'
-              }
+              beginAtZero: true,
+              title: { display: true, text: 'Total Value (₹)' }
             },
             x: {
-              title: {
-                display: true,
-                text: 'Date'
-              }
+              title: { display: true, text: 'Stocks' }
             }
           }
         }
