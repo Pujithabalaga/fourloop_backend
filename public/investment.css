@@ -174,4 +174,35 @@ body {
   .buy-btn:hover {
     background-color: #388e3c;
   }
+  /* Color for price change % */
+.price-percent.green {
+    color: #2e7d32;
+    font-weight: bold;
+    transition: color 0.5s, transform 0.3s;
+  }
+  
+  .price-percent.red {
+    color: #c62828;
+    font-weight: bold;
+    transition: color 0.5s, transform 0.3s;
+  }
+  
+  /* Pop effect when updated */
+  .price-updated {
+    animation: pulseUpdate 0.6s ease;
+  }
+  
+  @keyframes pulseUpdate {
+    0% {
+      transform: scale(1);
+      background-color: rgba(255, 235, 59, 0.4); /* yellow flash */
+    }
+    50% {
+      transform: scale(1.1);
+      background-color: transparent;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
   

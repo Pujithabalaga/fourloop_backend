@@ -131,6 +131,13 @@ const stocks = [
       }
   
       const percent = ((newPrice - oldPrice) / oldPrice * 100).toFixed(2);
+
+// 🔁 Update priceChangeData
+const priceChangeObj = priceChangeData.find(p => p.ticker === company.ticker);
+if (priceChangeObj) {
+  priceChangeObj.change = parseFloat(percent);
+}
+
       const priceElement = document.querySelector(`#price-${index}`);
       const percentElement = priceElement?.nextElementSibling;
   
@@ -138,7 +145,17 @@ const stocks = [
         priceElement.innerText = `₹${newPrice}`;
         percentElement.innerText = `${percent >= 0 ? '+' : ''}${percent}%`;
         percentElement.className = `price-percent ${percent >= 0 ? 'green' : 'red'}`;
+      
+        // 👇 Add animation class temporarily
+        priceElement.classList.add('price-updated');
+        percentElement.classList.add('price-updated');
+      
+        setTimeout(() => {
+          priceElement.classList.remove('price-updated');
+          percentElement.classList.remove('price-updated');
+        }, 600);
       }
+      
     });
   }
   
@@ -237,5 +254,9 @@ const stocks = [
     updatePrices();
     renderCompanies(currentView);
   }, 3000);
+  // 👉 Show all companies initially when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    renderCompanies(); // This will populate all company cards on load
+  });
   
   

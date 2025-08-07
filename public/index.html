@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinTrack - Welcome</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Particle Canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      background: linear-gradient(to right, #1e88e5, #42a5f5);
+    }
+
+    body {
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      animation: fadeInDown 1s ease-in-out;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      animation: fadeInDown 1.5s ease-in-out;
+    }
+
+    .btn-group {
+      margin-top: 40px;
+      display: flex;
+      gap: 20px;
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      font-size: 1rem;
+      background-color: #fff;
+      color: #1976d2;
+      text-decoration: none;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .btn:hover {
+      background-color: #e3f2fd;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      color: #333;
+      text-align: left;
+      position: relative;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <h1>Welcome to FinTrack 🚀</h1>
+  <p>Track, Analyze & Grow Your Investments</p>
+
+  <div class="btn-group">
+    <a class="btn" href="dashboard.html">Go to Dashboard</a>
+    <button class="btn" onclick="openAboutModal()">About</button>
+  </div>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeAboutModal()">&times;</button>
+      <h2>About FinTrack</h2>
+      <p>
+        FinTrack is your personal investment portfolio manager. Monitor your holdings, analyze company performance, and make data-driven decisions with ease.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Modal logic
+    function openAboutModal() {
+      document.getElementById('aboutModal').style.display = 'flex';
+    }
+
+    function closeAboutModal() {
+      document.getElementById('aboutModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('aboutModal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // Particle background
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function createParticles() {
+      particles = [];
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 1,
+          dx: (Math.random() - 0.5) * 0.5,
+          dy: (Math.random() - 0.5) * 0.5
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      requestAnimationFrame(drawParticles);
+    }
+
+    createParticles();
+    drawParticles();
+  </script>
+</body>
+</html>
