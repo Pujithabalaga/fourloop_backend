@@ -3,15 +3,17 @@ const router = express.Router();
 const db = require('../db');
 
 // ===== Get All Portfolio Entries =====
+// portfolio.js
 router.get('/', (req, res) => {
-  const query = 'SELECT ticker, quantity, average_price FROM portfolio';
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to fetch portfolio data' });
-    }
-    res.json(results);
+    const query = 'SELECT ticker, quantity, average_price FROM portfolio WHERE quantity > 0';
+    db.query(query, (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch portfolio data' });
+      }
+      res.json(results);
+    });
   });
-});
+  
 
 // ===== Add or Update Portfolio Entry =====
 router.post('/', (req, res) => {
